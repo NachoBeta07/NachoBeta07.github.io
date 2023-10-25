@@ -1,43 +1,57 @@
 import machine
 import time
 import _thread
-import ota  # Este es tu módulo de actualización
+
+# Asumiendo que tienes un módulo 'ota' con una función 'check_for_update'
+# Si no es así, necesitarás definir la lógica de 'check_for_update' que se ajuste a tus necesidades
+import ota
 
 # Configuraciones
-FIRMWARE_VERSION = 1.1  # Debe ser un float
-UPDATE_URL = "https://oskredu.github.io/esp32-20230426-v1.20.0.bin"
-LED_PIN = 18  # GPIO para el LED
+FIRMWARE_VERSION = 1.0  # Debe ser un float
+UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
+LED_PIN = 17  # GPIO para el LED
 
-# Definir el LED
+# Estableciendo el LED
 led = machine.Pin(LED_PIN, machine.Pin.OUT)
 
-def led_blink(led_pin, interval, stop_event):
+# Control para el bucle de parpadeo del LED
+stop_blinking = False
+
+def led_blinking_control():
     """
-    Esta función maneja el parpadeo del LED.
+    Controla el parpadeo del LED. Si 'stop_blinking' es True, detiene el parpadeo.
     """
-    while not stop_event.is_set():
-        led_pin.value(not led_pin.value())  # Cambia el estado del LED
-        time.sleep(interval)
+    global stop_blinking
+    while not stop_blinking:
+        led.value(not led.value())  # Cambia el estado del LED
+        time.sleep(0.5)  # Parpadeo cada 0.5 segundos
 
 def main():
     """
-    Función principal que ejecuta las tareas requeridas.
+    Función principal para gestionar el parpadeo y las actualizaciones del firmware.
     """
-    # Crea un evento para detener el hilo
-    stop_event = _thread.allocate_lock()
+    global stop_blinking
 
-    # Inicia un nuevo hilo que maneja el parpadeo del LED
-    _thread.start_new_thread(led_blink, (led, 30, stop_event))  # Parpadea cada 30 segundos
+    # Iniciar el parpadeo del LED en un nuevo hilo
+    _thread.start_new_thread(led_blinking_control, ())
 
     while True:
-        # El script principal sólo necesita llamar a la función de verificación de actualización.
-        # No necesita conocer los detalles internos de cómo se realiza la actualización.
-        if ota.check_for_update(FIRMWARE_VERSION, UPDATE_URL):
-            print("Actualización encontrada y aplicada. El dispositivo se reiniciará.")
-            machine.reset()  # Reinicia el dispositivo si la actualización fue exitosa
+        # Verificar si hay actualizaciones disponibles
+        update_available = ota.check_for_update()
 
-        time.sleep(60)  # Espera antes de la próxima verificación
+        if update_available:
+            print("Actualización disponible. Aplicando actualización...")
+            stop_blinking = True  # Detener el parpadeo del LED
+            # Aquí, podrías agregar lógica para aplicar la actualización, si es necesario.
+            # Por ejemplo, podrías tener una función en tu módulo 'ota' que maneje el proceso de actualización.
+            time.sleep(5)  # Simular tiempo para la actualización (elimina esta línea si aplicas la actualización)
+            machine.reset()  # Reiniciar el dispositivo para aplicar la actualización
+        else:
+            print("No hay actualizaciones disponibles.")
 
-# Ejecuta la función main si este script está en el punto de entrada principal
+        # Espera 60 segundos antes de la próxima verificación
+        time.sleep(60)
+
+# Ejecuta la función principal
 if __name__ == '__main__':
-   main()
+    main()
