@@ -11,7 +11,7 @@ FIRMWARE_VERSION = 1.1 # Debe ser un float
 UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
 
 # Variables para el LED
-current_led_pin = 18  # GPIO para el LED actual
+current_led_pin = 17 # GPIO para el LED actual
 led = machine.Pin(current_led_pin, machine.Pin.OUT)
 
 # Control para el bucle de parpadeo del LED
