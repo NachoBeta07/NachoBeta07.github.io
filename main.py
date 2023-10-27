@@ -7,9 +7,9 @@ import _thread
 import ota
 
 # Configuraciones
-FIRMWARE_VERSION = 1.0  # Debe ser un float
+FIRMWARE_VERSION = 1.1  # Debe ser un float
 UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
-LED_PIN = 17  # GPIO para el LED
+LED_PIN = 16  # GPIO para el LED
 
 # Estableciendo el LED
 led = machine.Pin(LED_PIN, machine.Pin.OUT)
