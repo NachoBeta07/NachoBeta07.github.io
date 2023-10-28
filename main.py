@@ -1,65 +1,63 @@
 import machine
 import time
 import _thread
+import ota  # Asegúrate de tener este módulo
 
-# Asumiendo que tienes un módulo 'ota' con una función 'check_for_update'
-# Si no es así, necesitarás definir la lógica de 'check_for_update' que se ajuste a tus necesidades
-import ota
 
-# Configuraciones
-FIRMWARE_VERSION = 1.0 # Debe ser un float
+# Constantes para la versión del firmware, la URL de actualización y el pin del LED
+FIRMWARE_VERSION = 1.1  # Debe ser un float
 UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
+LED_PIN = 18  # GPIO para el LED
 
-# Variables para el LED
-current_led_pin = 16 # GPIO para el LED actual
-led = machine.Pin(current_led_pin, machine.Pin.OUT)
-
-# Control para el bucle de parpadeo del LED
-stop_blinking = False
-
-def led_blinking_control():
+# Configuración inicial de los dispositivos/actuadores (por ejemplo, LED)
+# NOTA: Los usuarios deben modificar estas líneas según sea necesario
+pin_device = LED_PIN  # Usamos la constante LED_PIN para el pin GPIO del LED
+device = machine.Pin(pin_device, machine.Pin.OUT)
+def device_control_logic():
     """
-    Controla el parpadeo del LED. Si 'stop_blinking' es True, detiene el parpadeo.
+    Lógica de control para dispositivos/actuadores (como relés, LEDs, etc.)
+
+    Los usuarios deben modificar esta función según sus necesidades específicas.
     """
-    global stop_blinking
-    while not stop_blinking:
-        led.value(not led.value())  # Cambia el estado del LED
-        time.sleep(0.5)  # Parpadeo cada 0.5 segundos
-
-def main():
-    global stop_blinking
-    global current_led_pin
-
-    # Iniciar el parpadeo del LED en un nuevo hilo
-    _thread.start_new_thread(led_blinking_control, ())
-
     while True:
-        # Verificar si hay actualizaciones disponibles
-        update_available = ota.check_for_update()
+        # Encender el LED
+        print("Encendiendo el LED.")
+        device.value(True)  # Encender el LED
+        time.sleep(5)
 
+        # Apagar el LED
+        print("Apagando el LED.")
+        device.value(False)  # Apagar el LED
+        time.sleep(5)
+
+def ota_update_check():
+    """
+    Lógica para verificar y aplicar actualizaciones OTA. 
+    Esta función no debe ser modificada por los usuarios para asegurar la integridad de la actualización OTA.
+    """
+    while True:
+        update_available = ota.check_for_update()
         if update_available:
             print("Actualización disponible. Aplicando actualización...")
-            stop_blinking = True  # Detener el parpadeo del LED
-
-            # Aquí, podrías agregar lógica para aplicar la actualización, si es necesario.
-            # Por ejemplo, podrías tener una función en tu módulo 'ota' que maneje el proceso de actualización.
-            time.sleep(5)  # Simular tiempo para la actualización (elimina esta línea si aplicas la actualización)
-
-            # Apaga el LED anterior
-            led.value(0)
-            
-            # Cambia el pin al nuevo valor
-            new_led_pin = 19  # Cambia este valor al nuevo pin que desees
-            current_led_pin = new_led_pin
-            led.init(machine.Pin(new_led_pin, machine.Pin.OUT))
-            stop_blinking = False  # Reanuda el parpadeo en el nuevo LED
-
+            # Código para aplicar la actualización aquí
+            time.sleep(5)  # Simulación del proceso de actualización
+            machine.reset()  # Reiniciar el dispositivo para aplicar la actualización
         else:
             print("No hay actualizaciones disponibles.")
-
-        # Espera 60 segundos antes de la próxima verificación
         time.sleep(60)
 
-# Ejecuta la función principal
-if __name__ == '__main__':
+def main():
+    """
+    Función principal que inicializa los hilos y procesos necesarios.
+
+    La estructura general de esta función no debe ser modificada por los usuarios.
+    """
+    # Iniciar la lógica de control del dispositivo en un nuevo hilo
+    _thread.start_new_thread(device_control_logic, ())
+
+    # La lógica de actualización OTA se ejecuta en el hilo principal
+    ota_update_check()
+
+# Punto de entrada del programa. No se recomienda modificar esta parte.
+if __name__ == "__main__":
     main()
