@@ -5,9 +5,9 @@ import ota  # Asegúrate de tener este módulo
 
 
 # Constantes para la versión del firmware, la URL de actualización y el pin del LED
-FIRMWARE_VERSION = 1.1  # Debe ser un float
+FIRMWARE_VERSION = 1.0  # Debe ser un float
 UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
-LED_PIN = 18  # GPIO para el LED
+LED_PIN = 17  # GPIO para el LED
 
 # Configuración inicial de los dispositivos/actuadores (por ejemplo, LED)
 # NOTA: Los usuarios deben modificar estas líneas según sea necesario
