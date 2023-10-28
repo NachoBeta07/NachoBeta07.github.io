@@ -3,31 +3,30 @@ import time
 import _thread
 import ota  # Asegúrate de tener este módulo
 
+# Constantes para la versión del firmware, la URL de actualización y el pin del LED
+FIRMWARE_VERSION = 1.1  # Debe ser un float
+UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
+LED_PIN = 18  # GPIO para el LED
+
+# Estableciendo el LED
+led = machine.Pin(LED_PIN, machine.Pin.OUT)
+
+def led_blinking_control():
+    """
+    Controla el parpadeo del LED. Si 'stop_blinking' es True, detiene el parpadeo.
+    """
+    global stop_blinking
+    while not stop_blinking:
+        led.value(not led.value())  # Cambia el estado del LED
+        time.sleep(0.5)  # Parpadeo cada 0.5 segundos
+
 def device_control_logic():
     """
     Lógica de control para dispositivos/actuadores (como LEDs, relés, etc.).
 
     Los usuarios deben modificar esta función según sus necesidades específicas.
     """
-    FIRMWARE_VERSION = 1.0  # Debe ser un float
-    UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
-    LED_PIN = 17  # GPIO para el LED
-
-    # Estableciendo el LED
-    led = machine.Pin(LED_PIN, machine.Pin.OUT)
-
-    # Control para el bucle de parpadeo del LED
-    stop_blinking = False
-
-    def led_blinking_control():
-        """
-        Controla el parpadeo del LED. Si 'stop_blinking' es True, detiene el parpadeo.
-        """
-        nonlocal stop_blinking
-        while not stop_blinking:
-            led.value(not led.value())  # Cambia el estado del LED
-            time.sleep(0.5)  # Parpadeo cada 0.5 segundos
-
+    global stop_blinking
     try:
         while True:
             # Detener el parpadeo del LED (si lo hay)
@@ -54,16 +53,13 @@ def device_control_logic():
     except KeyboardInterrupt:
         stop_blinking = True  # Asegurarse de que el parpadeo se detenga antes de salir
 
-        # Pasar los parámetros a la función de actualización OTA
-        ota_update_check(UPDATE_URL, FIRMWARE_VERSION)
-
-def ota_update_check(update_url, firmware_version):
+def ota_update_check():
     """
     Lógica para verificar y aplicar actualizaciones OTA. 
     Esta función no debe ser modificada por los usuarios para asegurar la integridad de la actualización OTA.
     """
     while True:
-        update_available = ota.check_for_update(update_url, firmware_version)
+        update_available = ota.check_for_update(UPDATE_URL, FIRMWARE_VERSION)
         if update_available:
             print("Actualización disponible. Aplicando actualización...")
             # Código para aplicar la actualización aquí
@@ -81,6 +77,9 @@ def main():
     """
     # Iniciar la lógica de control del dispositivo en un nuevo hilo
     _thread.start_new_thread(device_control_logic, ())
+
+    # La lógica de actualización OTA se ejecuta en el hilo principal
+    ota_update_check()
 
 # Punto de entrada del programa. No se recomienda modificar esta parte.
 if __name__ == "__main__":
