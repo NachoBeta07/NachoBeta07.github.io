@@ -5,11 +5,15 @@ import ota  # Asegúrate de tener este módulo
 
 # Constantes para la versión del firmware, la URL de actualización y el pin del LED
 FIRMWARE_VERSION = 1.1  # Debe ser un float
-UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
-LED_PIN = 18  # GPIO para el LED
+UPDATE_URL = "https://tu_url_de_actualizacion.json"
+LED_PIN = 18  # GPIO para el LED (puedes cambiarlo si es necesario)
 
 # Estableciendo el LED
-led = machine.Pin(LED_PIN, machine.Pin.OUT)
+current_led_pin = LED_PIN
+led = machine.Pin(current_led_pin, machine.Pin.OUT)
+
+# Control para el bucle de parpadeo del LED
+stop_blinking = False
 
 def led_blinking_control():
     """
@@ -22,11 +26,12 @@ def led_blinking_control():
 
 def device_control_logic():
     """
-    Lógica de control para dispositivos/actuadores (como LEDs, relés, etc.).
+    Lógica de control para dispositivos/actuadores (como LEDs, relés, etc.)
 
-    Los usuarios deben modificar esta función según sus necesidades específicas.
+    Los usuarios pueden modificar esta función según sus necesidades específicas.
     """
     global stop_blinking
+    global current_led_pin
     try:
         while True:
             # Detener el parpadeo del LED (si lo hay)
@@ -48,18 +53,22 @@ def device_control_logic():
             # Apagar el LED
             led.value(False)
 
+            # Cambiar el pin del LED (simplemente cambia este valor)
+            new_led_pin = 19  # Cambia este valor al nuevo pin que desees
+            current_led_pin = new_led_pin
+            led.init(machine.Pin(new_led_pin, machine.Pin.OUT))
+            
             # Esperar 1 segundo antes de repetir el ciclo
             time.sleep(1)
     except KeyboardInterrupt:
         stop_blinking = True  # Asegurarse de que el parpadeo se detenga antes de salir
-
 def ota_update_check():
     """
     Lógica para verificar y aplicar actualizaciones OTA. 
     Esta función no debe ser modificada por los usuarios para asegurar la integridad de la actualización OTA.
     """
     while True:
-        update_available = ota.check_for_update(UPDATE_URL, FIRMWARE_VERSION)
+        update_available = ota.check_for_update()
         if update_available:
             print("Actualización disponible. Aplicando actualización...")
             # Código para aplicar la actualización aquí
@@ -68,7 +77,6 @@ def ota_update_check():
         else:
             print("No hay actualizaciones disponibles.")
         time.sleep(60)
-
 def main():
     """
     Función principal que inicializa los hilos y procesos necesarios.
