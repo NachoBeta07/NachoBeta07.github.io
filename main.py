@@ -4,11 +4,11 @@ import _thread
 import ota  # Asegúrate de tener este módulo
 
 # Constantes para la versión del firmware y la URL de actualización
-FIRMWARE_VERSION = 1.1  # Debe ser un float
+FIRMWARE_VERSION = 1.0  # Debe ser un float
 UPDATE_URL = "https://nachobeta07.github.io/firmware_microPython.json"
 
 # Variables para el LED
-current_led_pin = 18  # GPIO para el LED actual
+current_led_pin = 17  # GPIO para el LED actual
 led = machine.Pin(current_led_pin, machine.Pin.OUT)
 
 # Control para el bucle de parpadeo del LED
@@ -63,6 +63,12 @@ def main():
     """
     global stop_blinking
     global current_led_pin
+
+     # Configura el pin antiguo del LED a bajo para apagarlo si es necesario
+    old_led_pin = 18
+    if current_led_pin != old_led_pin:  # Verifica si el pin actual es diferente al antiguo
+        old_led = machine.Pin(old_led_pin, machine.Pin.OUT)
+        old_led.value(False)  # Apaga el LED del pin antiguo
 
     # Iniciar el parpadeo del LED en un nuevo hilo
     _thread.start_new_thread(led_blinking_control, ())
