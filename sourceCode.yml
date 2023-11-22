@@ -1,0 +1,35 @@
+
+dispositivo:
+  tipo: "esp32"
+  pin:
+    numero: 5
+    modo: "OUTPUT"
+
+control_dispositivo:
+  bucle: true
+  acciones:
+    - accion: "ACTIVAR"
+      mensaje: "Activando dispositivo."
+      duracion: 5  # en segundos
+    - accion: "DESACTIVAR"
+      mensaje: "Desactivando dispositivo."
+      duracion: 5  # en segundos
+
+actualizacion_ota:
+  bucle: true
+  acciones:
+    - accion: "VERIFICAR_ACTUALIZACION"
+      si_disponible:
+        - accion: "APLICAR_ACTUALIZACION"
+          mensaje: "Actualización disponible. Aplicando actualización..."
+          duracion: 5  # en segundos
+        - accion: "REINICIAR"
+      si_no_disponible:
+        - mensaje: "No hay actualizaciones disponibles."
+          duracion: 60  # en segundos
+
+ejecucion:
+  funcion_principal: "ota_update_check"
+  hilos:
+    - "device_control_logic"
+
